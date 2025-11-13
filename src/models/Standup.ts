@@ -13,6 +13,8 @@ export interface IStandup extends Document {
     vague_score: number;
     suggestion: string;
   };
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const standupSchema = new Schema<IStandup>(

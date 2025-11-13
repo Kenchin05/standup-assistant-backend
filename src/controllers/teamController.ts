@@ -44,3 +44,16 @@ export const viewTeamMembers = async (req: any, res: Response) => {
   if (!team) return res.status(404).json({ message: "Team not found" });
   res.json(team.members);
 };
+
+
+// Get user's current team
+export const getMyTeam = async (req: any, res: Response) => {
+  const team = await Team.findById(req.user.teamId)
+    .select("name code createdAt members");
+
+  if (!team) {
+    return res.status(404).json({ message: "No team found for this user" });
+  }
+
+  res.json(team);
+};

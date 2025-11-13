@@ -83,7 +83,7 @@ export const getTeamAIInsights = async (req: any, res: any) => {
 };
 
 export const getMyStandups = async (req: any, res: Response) => {
-  const standups = await Standup.find({ userId: req.user._id }).sort({ date: -1 });
+  const standups = await Standup.find({ userId: req.user._id }).sort({ date: -1 }).limit(30);
   res.json(standups);
 };
 
@@ -92,3 +92,53 @@ export const getTeamStandups = async (req: any, res: Response) => {
   res.json(standups);
 };
 
+// PUT /api/standup/update
+export const updateTodayStandup = async (req: any, res: Response) => {
+  const { yesterday, today, blockers } = req.body;
+  const userId = req.user.id;
+
+  // Find standup for today
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+
+  const standup = await Standup.findOne({
+    userId,
+    date: { $gte: startOfDay },
+  });
+
+  if (!standup) {
+    return res.status(404).json({ message: "No standup found for today" });
+  }
+
+  // Prevent editing if it's past midnight
+  const now = new Date();
+  const endOfDay = new Date();
+  endOfDay.setHours(23, 59, 59, 999);
+
+  if (now > endOfDay) {
+    return res.status(400).json({ message: "Can't edit after the day ends" });
+  }
+
+  standup.yesterday = yesterday || standup.yesterday;
+  standup.today = today || standup.today;
+  standup.blockers = blockers || standup.blockers;
+
+  await standup.save();
+
+  res.json({ message: "Standup updated successfully", standup });
+};
+
+// DELETE /api/standup/:id
+export const deleteStandup = async (req: any, res: Response) => {
+  const userId = req.user.id;
+  const { id } = req.params;
+
+  const standup = await Standup.findById(id);
+  if (!standup) return res.status(404).json({ message: "Standup not found" });
+
+  if (standup.userId.toString() !== userId)
+    return res.status(403).json({ message: "Not authorized to delete this standup" });
+
+  await standup.deleteOne();
+  res.json({ message: "Standup deleted successfully" });
+};

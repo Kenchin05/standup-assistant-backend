@@ -1,5 +1,9 @@
+import dotenv from 'dotenv';
 import { ChatGroq } from "@langchain/groq";
 import { PromptTemplate } from "@langchain/core/prompts";
+
+// Load environment variables
+dotenv.config();
 
 console.log("🚀 Initializing Groq model...");
 
