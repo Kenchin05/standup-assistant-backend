@@ -5,10 +5,9 @@ import { analyseStandup } from "../services/aiService";
 import { generateTeamSummary } from "../services/aiService"; 
 
 export const createOrUpdateStandup = async (req: any, res: any) => {
-    console.log("🚀 Received /api/standup POST request");
 
   const { yesterday, today, blockers } = req.body;
-    console.log("🧾 Standup content:", { yesterday, today, blockers });
+    console.log("Standup content:", { yesterday, today, blockers });
   const todayDate = new Date().toDateString();
 
   let standup = await Standup.findOne({
@@ -19,7 +18,6 @@ let isNew = false;
 let hasChanged = false;
 
  if (standup) {
-    console.log("📄 Found existing standup entry");
     if (
       standup.yesterday !== yesterday ||
       standup.today !== today ||
@@ -31,7 +29,6 @@ let hasChanged = false;
       standup.blockers = blockers;
     }
   } else {
-    console.log("🆕 Creating new standup entry");
     isNew = true;
     standup = new Standup({
       userId: req.user._id,
@@ -42,12 +39,10 @@ let hasChanged = false;
     });
   }
 
-  // Trigger AI only if content changed or first creation
+  // only reanalyse if content changed or creating for first time 
     const shouldReanalyse = isNew || hasChanged || !standup.aiFeedback;
-  console.log("🤖 Should reanalyse?", shouldReanalyse);
 
   if (shouldReanalyse) {
-    console.log("📡 analyseStandup() triggered...");
     const aiResult = await analyseStandup({ yesterday, today, blockers });
     standup.aiFeedback = aiResult;
   }
@@ -57,6 +52,7 @@ let hasChanged = false;
   res.status(201).json({ message: "Standup saved", standup });
 };  
 
+// get team insights
 export const getTeamAIInsights = async (req: any, res: any) => {
   const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
 
@@ -67,7 +63,7 @@ export const getTeamAIInsights = async (req: any, res: any) => {
     return res.json(cached);
   }
 
-  // If not, fetch team standups and call GPT once
+  // fetch team standups and call AI once
   console.log("Generating new team summary...");
   const standups = await Standup.find({ teamId: req.user.teamId }).populate("userId", "name");
   const insights = await generateTeamSummary(standups);
@@ -92,7 +88,7 @@ export const getTeamStandups = async (req: any, res: Response) => {
   res.json(standups);
 };
 
-// PUT /api/standup/update
+// update existing standup
 export const updateTodayStandup = async (req: any, res: Response) => {
   const { yesterday, today, blockers } = req.body;
   const userId = req.user.id;
@@ -110,7 +106,7 @@ export const updateTodayStandup = async (req: any, res: Response) => {
     return res.status(404).json({ message: "No standup found for today" });
   }
 
-  // Prevent editing if it's past midnight
+  // Prevent editing if it's past midnight(manual)
   const now = new Date();
   const endOfDay = new Date();
   endOfDay.setHours(23, 59, 59, 999);
@@ -128,7 +124,7 @@ export const updateTodayStandup = async (req: any, res: Response) => {
   res.json({ message: "Standup updated successfully", standup });
 };
 
-// DELETE /api/standup/:id
+// delete an existing standup
 export const deleteStandup = async (req: any, res: Response) => {
   const userId = req.user.id;
   const { id } = req.params;

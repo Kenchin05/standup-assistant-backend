@@ -5,7 +5,7 @@ import { PromptTemplate } from "@langchain/core/prompts";
 // Load environment variables
 dotenv.config();
 
-console.log("🚀 Initializing Groq model...");
+console.log("Initializing AI model...");
 
 const model = new ChatGroq({
   model: "llama-3.1-8b-instant",
@@ -15,7 +15,7 @@ const model = new ChatGroq({
 
 // Individual stand-up analysis
 export async function analyseStandup({ yesterday, today, blockers }: any) {
-  console.log("📡 analyseStandup() triggered");
+  console.log("Analyzing standup...");    
   const prompt = PromptTemplate.fromTemplate(`
 You are an AI assistant that extracts *actual* daily work progress from brief stand-up notes.
 
@@ -48,27 +48,28 @@ Important:
   const input = await prompt.format({ yesterday, today, blockers });
     
   try {
-  console.log("📤 Sending to Groq model...");
+  console.log("Sending to AI model...");
   const response = await model.invoke([
+    // System prompt 
     { role: "system", content: "You are a strict JSON generator. Do not include any explanation or code." },
+    // User Input prompt
     { role: "user", content: input }
   ]);
   let content = response.content as string;
 
-  // Strip code fences or non-JSON text if model adds them
+  // Explicit stripping of any non-JSON text if model adds them
   content = content
     .replace(/```json/g, "")
     .replace(/```python/g, "")
     .replace(/```/g, "")
     .trim();
 
-  // Try parsing
+  // parsing
   const parsed = JSON.parse(content);
-  console.log("✅ Parsed AI JSON:", parsed);
   return parsed;
 
 } catch (err: any) {
-  console.error("❌ analyseStandup error:", err.message);
+  console.error("analyseStandup error:", err.message);
   return {
     key_tasks: [],
     tone: "neutral",
@@ -80,7 +81,6 @@ Important:
 
 // Team summary
 export async function generateTeamSummary(teamStandups: any[]) {
-    console.log("📡 generateTeamSummary() triggered...");
   const joined = teamStandups
     .map(
       (s) =>
@@ -117,7 +117,6 @@ Only valid JSON!
   const input = await prompt.format({ joined });
 
   try {
-    console.log("📤 Sending team summary request to Groq...");
     const response = await model.invoke([
       { role: "system", content: "You are a strict JSON generator. Do not include any explanation, code or markdown." },
       { role: "user", content: input }
@@ -125,7 +124,6 @@ Only valid JSON!
     
     let content = response.content as string;
 
-    // 🧹 Clean out accidental code fences or junk
     content = content
       .replace(/```json/g, "")
       .replace(/```python/g, "")
@@ -133,11 +131,9 @@ Only valid JSON!
       .trim();
 
     const parsed = JSON.parse(content);
-    console.log("✅ Parsed team summary JSON:", parsed);
-
     return parsed;
   } catch (err: any) {
-    console.error("❌ generateTeamSummary error:", err.message);
+    console.error("generateTeamSummary error:", err.message);
     return {
       summary: "AI temporarily unavailable or returned invalid data.",
       common_blockers: [],

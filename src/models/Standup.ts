@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
 
+// Typescript interface for the standup model
 export interface IStandup extends Document {
   userId: mongoose.Types.ObjectId;
   teamId: mongoose.Types.ObjectId;
@@ -17,6 +18,7 @@ export interface IStandup extends Document {
   updatedAt?: Date;
 }
 
+// Mongoose schema for the standup model
 const standupSchema = new Schema<IStandup>(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },

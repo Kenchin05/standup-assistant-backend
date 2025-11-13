@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import User, { IUser } from "../models/User";
 import { generateToken } from "../utils/generateToken";
 
+// Register a new user
 export const registerUser = async (req: Request, res: Response) => {
   const { name, email, password } = req.body;
   const userExists = await User.findOne({ email });
@@ -20,6 +21,7 @@ export const registerUser = async (req: Request, res: Response) => {
   }
 };
 
+// Login an existing user
 export const loginUser = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email });

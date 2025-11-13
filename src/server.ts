@@ -7,4 +7,4 @@ connectDB();
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-console.log("🔑 GROQ_API_KEY loaded?", !!process.env.GROQ_API_KEY);
+console.log("GROQ_API_KEY loaded?", !!process.env.GROQ_API_KEY);
