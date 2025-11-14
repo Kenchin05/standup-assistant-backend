@@ -91,6 +91,40 @@ http://localhost:5000
 ```
 
 ---
+# Seed Script (Sample Users + Teams + Standups)
+The project includes a database seeding script that generates:
+
+- 5 sample users
+- 2 teams (Alpha, Beta)
+- Automatic team-member linking
+- 3–5 standups per user
+- AI feedback placeholders (so Insights works immediately)
+
+## File Location
+```bash
+src/seed.ts
+```
+
+## Run Seeder
+```bash
+npm run seed
+```
+This will:
+- Connect to MongoDB
+- Clear existing users, teams, standups
+- Insert all sample data
+- Print test login credentials
+
+## Output
+```bash
+Login Accounts:
+rishav@test.com | Password123
+aditi@test.com | Password123
+kirat@test.com | Password123
+rahul@test.com | Password123
+khyati@test.com | Password123
+```
+---
 
 # API Documentation
 
@@ -160,14 +194,4 @@ Given all team members’ standups, the AI:
 
 ---
 
-# Screenshots
 
-Add screenshots here:
-
-```
-/assets/dashboard.png
-/assets/team.png
-/assets/insights.png
-```
-
----
